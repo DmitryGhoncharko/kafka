@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: kafka-service
+  cloud:
+    config:
+      uri: http://localhost:8088
+  datasource:
+    url: jdbc:postgresql://176.124.216.223:5432/kafkaapp
+    username: kafkaapp
+    password: kafkaappkafkaapp
+    hikari:
+      maximum-pool-size: 6
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true

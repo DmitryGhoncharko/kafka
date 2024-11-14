@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest  # Используем официальную версию Zookeeper от Confluent
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181  # Порт для клиентов Zookeeper
+      ZOOKEEPER_TICK_TIME: 2000  # Время в миллисекундах, которое Zookeeper использует для внутренней синхронизации
+    ports:
+      - "2181:2181"  # Порт для внешнего подключения к Zookeeper
+    networks:
+      - kafka-net
+    restart: always  # Автоматический перезапуск контейнера в случае сбоя
+
+  kafka:
+    image: confluentinc/cp-kafka:latest  # Используем официальную версию Kafka от Confluent
+    container_name: kafka
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093  # Один слушатель на порту 9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093  # Адрес для подключения клиентов
+      KAFKA_LISTENER_SECURITY_PROTOCOLS: PLAINTEXT  # Используем только PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # Подключение к Zookeeper
+      KAFKA_LISTENER_NAMES: PLAINTEXT  # Имя слушателя, использующего PLAINTEXT
+      KAFKA_LISTENER_PORT: 9093  # Порт для прослушивания
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT  # Протокол безопасности для слушателей
+      KAFKA_LOG_RETENTION_HOURS: 168  # Время хранения логов (7 дней)
+      KAFKA_NUM_PARTITIONS: 3  # Число партиций по умолчанию
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1  # Коэффициент репликации
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'  # Отключаем автоматическое создание тем
+    ports:
+      - "9093:9093"  # Порт для Kafka
+    depends_on:
+      - zookeeper  # Kafka зависит от Zookeeper
+    networks:
+      - kafka-net
+    restart: always  # Автоматический перезапуск контейнера в случае сбоя
+
+networks:
+  kafka-net:
+    driver: bridge
